@@ -1,0 +1,2 @@
+# Dependencies are provided by the shared Lambda layer
+# See: lambda/shared/layer/python/requirements.txt

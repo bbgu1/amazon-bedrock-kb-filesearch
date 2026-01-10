@@ -1,0 +1,27 @@
+{
+  "api_gateway_endpoint": {
+    "sensitive": false,
+    "type": "string",
+    "value": "https://bu2986emlf.execute-api.us-east-1.amazonaws.com/dev/stores"
+  },
+  "bedrock_agent_alias_id": {
+    "sensitive": false,
+    "type": "string",
+    "value": "4JNH6GNGQB"
+  },
+  "bedrock_agent_id": {
+    "sensitive": false,
+    "type": "string",
+    "value": "4YMNM1CBQX"
+  },
+  "document_bucket_name": {
+    "sensitive": false,
+    "type": "string",
+    "value": "dev-bedrock-file-search-documents"
+  },
+  "knowledge_base_id": {
+    "sensitive": false,
+    "type": "string",
+    "value": "O3N8L7IQXX"
+  }
+}
