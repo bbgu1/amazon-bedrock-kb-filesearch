@@ -391,7 +391,7 @@ Copy `terraform/environments/dev` to `staging` or `prod` and adjust variables.
 
 ## License
 
-This is a demo/example project. Use at your own risk.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## Support
 
