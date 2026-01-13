@@ -15,35 +15,84 @@ This solution showcases how to build a scalable, multi-tenant document search sy
 
 ## Architecture
 
-### Components
+### High-Level Architecture
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                          WebUI (React)                          │
-│  - Store Management  - Document Upload  - Search & Q&A         │
-└────────────┬────────────────────┬────────────────┬─────────────┘
-             │                    │                │
-             ▼                    ▼                ▼
-    ┌────────────────┐   ┌────────────────┐   ┌──────────────────┐
-    │  API Gateway   │   │   S3 Bucket    │   │ Bedrock Agent    │
-    │  + Lambda      │   │  (Documents)   │   │    Runtime       │
-    └────────┬───────┘   └────────┬───────┘   └────────┬─────────┘
-             │                    │                     │
-             ▼                    ▼                     ▼
-    ┌────────────────┐   ┌────────────────────────────────────────┐
-    │   DynamoDB     │   │   Bedrock Knowledge Base               │
-    │ (Store Metadata│   │   - Vector Search (Retrieve)           │
-    └────────────────┘   │   - Q&A (RetrieveAndGenerate)          │
-                         │   - Titan Text Embeddings              │
-                         │   - Amazon Nova Pro (Generation)       │
-                         └────────────┬───────────────────────────┘
-                                      │
-                                      ▼
-                         ┌────────────────────────┐
-                         │  OpenSearch Serverless │
-                         │   (Vector Database)    │
-                         └────────────────────────┘
+                                    ┌─────────────┐
+                                    │    User     │
+                                    └──────┬──────┘
+                                           │
+                    ┌──────────────────────┼──────────────────────┐
+                    │                      │                      │
+                    ▼                      ▼                      ▼
+         ┌──────────────────┐   ┌──────────────────┐   ┌──────────────────┐
+         │  Store Mgmt API  │   │  Document Upload │   │  Search & Q&A    │
+         └──────────────────┘   └──────────────────┘   └──────────────────┘
+                    │                      │                      │
+                    │                      │                      │
+    ┌───────────────┴───────────┐         │         ┌────────────┴────────────┐
+    │                           │         │         │                         │
+    ▼                           ▼         ▼         ▼                         ▼
+┌─────────┐              ┌──────────┐ ┌─────────┐ ┌──────────────┐   ┌──────────────┐
+│   API   │              │ DynamoDB │ │   S3    │ │   Bedrock    │   │   Bedrock    │
+│ Gateway │──────────────│  Store   │ │ Bucket  │ │  Knowledge   │   │   Runtime    │
+│         │              │ Metadata │ │  Docs   │ │     Base     │   │ (Retrieve &  │
+└─────────┘              └──────────┘ └────┬────┘ └──────┬───────┘   │  Generate)   │
+                                            │             │           └──────┬───────┘
+                                            │             │                  │
+                                            └─────────────┤                  │
+                                                          │                  │
+                                                          ▼                  │
+                                                   ┌─────────────┐           │
+                                                   │   Titan     │           │
+                                                   │ Embeddings  │           │
+                                                   └──────┬──────┘           │
+                                                          │                  │
+                                                          ▼                  │
+                                                   ┌─────────────┐           │
+                                                   │ OpenSearch  │           │
+                                                   │ Serverless  │◄──────────┤
+                                                   │ (Vector DB) │           │
+                                                   └─────────────┘           │
+                                                                             │
+                                                                             ▼
+                                                                      ┌─────────────┐
+                                                                      │  Nova Pro   │
+                                                                      │ (Generate)  │
+                                                                      └─────────────┘
 ```
+
+### Component Details
+
+**Frontend Layer**
+- **WebUI (React + TypeScript)**: Browser-based interface for all operations
+  - Direct AWS SDK calls (no backend proxy)
+  - Store management, document upload, search, and Q&A
+
+**API Layer**
+- **API Gateway + Lambda**: RESTful API for store CRUD operations
+- **DynamoDB**: Stores metadata for each tenant (store_id, name, description)
+
+**Storage Layer**
+- **S3 Bucket**: Document storage with metadata files
+  - Each document has a corresponding `.metadata.json` file
+  - Metadata includes: store_id, document_id, filename, content_type, upload_date
+
+**AI/ML Layer**
+- **Bedrock Knowledge Base**: Manages document indexing and retrieval
+  - Automatically chunks documents
+  - Creates vector embeddings using Titan
+  - Stores embeddings in OpenSearch Serverless
+- **Bedrock Runtime**: Provides two APIs
+  - **Retrieve**: Semantic search returning relevant document chunks
+  - **RetrieveAndGenerate**: AI-powered Q&A with citations
+- **Titan Text Embeddings v2**: Converts text to 1024-dimensional vectors
+- **Amazon Nova Pro**: Generates natural language answers from retrieved context
+
+**Vector Database**
+- **OpenSearch Serverless**: Stores and searches vector embeddings
+  - HNSW algorithm for fast similarity search
+  - Metadata filtering for multi-tenant isolation
 
 ### Key Features
 
