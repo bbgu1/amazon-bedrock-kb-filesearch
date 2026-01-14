@@ -44,8 +44,9 @@ This solution showcases how to build a scalable, multi-tenant document search sy
                                                           │                  │
                                                           ▼                  │
                                                    ┌─────────────┐           │
-                                                   │   Titan     │           │
-                                                   │ Embeddings  │           │
+                                                   │   Nova 2    │           │
+                                                   │ Multimodal  │           │
+                                                   │  Embedding  │           │
                                                    └──────┬──────┘           │
                                                           │                  │
                                                           ▼                  │
@@ -57,8 +58,8 @@ This solution showcases how to build a scalable, multi-tenant document search sy
                                                                              │
                                                                              ▼
                                                                       ┌─────────────┐
-                                                                      │  Nova Pro   │
-                                                                      │ (Generate)  │
+                                                                      │  Nova 2     │
+                                                                      │  Lite       │
                                                                       └─────────────┘
 ```
 
@@ -86,8 +87,8 @@ This solution showcases how to build a scalable, multi-tenant document search sy
 - **Bedrock Runtime**: Provides two APIs
   - **Retrieve**: Semantic search returning relevant document chunks
   - **RetrieveAndGenerate**: AI-powered Q&A with citations
-- **Titan Text Embeddings v2**: Converts text to 1024-dimensional vectors
-- **Amazon Nova Pro**: Generates natural language answers from retrieved context
+- **Nova 2 Multimodal Embedding**: Converts text and images to vector embeddings
+- **Amazon Nova 2 Lite**: Generates natural language answers from retrieved context
 
 **Vector Database**
 - **OpenSearch Serverless**: Stores and searches vector embeddings
@@ -130,8 +131,8 @@ This solution showcases how to build a scalable, multi-tenant document search sy
 - **AWS IAM**: Access control
 
 ### Models
-- **Embeddings**: Amazon Titan Text Embeddings v2
-- **Generation**: Amazon Nova Pro
+- **Embeddings**: Amazon Nova 2 Multimodal Embedding (text and images)
+- **Generation**: Amazon Nova 2 Lite
 
 ### Infrastructure
 - **Terraform**: Infrastructure as Code
@@ -168,19 +169,19 @@ terraform output
 ### 2. Configure WebUI
 
 ```bash
-cd ../../webui
+cd ../../../webui
 
 # Install dependencies
 npm install
 
 # Auto-configure from Terraform outputs
 (cd ../terraform/environments/dev && terraform refresh && \
- echo "VITE_AWS_REGION=$(terraform output -raw aws_region)" > ../../webui/.env && \
- echo "VITE_KNOWLEDGE_BASE_ID=$(terraform output -raw knowledge_base_id)" >> ../../webui/.env && \
- echo "VITE_DATA_SOURCE_ID=$(terraform output -raw data_source_id)" >> ../../webui/.env && \
- echo "VITE_DATA_SOURCE_BUCKET_NAME=$(terraform output -raw data_source_bucket_name)" >> ../../webui/.env && \
- echo "VITE_API_GATEWAY_ENDPOINT=$(terraform output -raw api_gateway_endpoint)" >> ../../webui/.env && \
- echo "VITE_GENERATION_MODEL_ID=us.amazon.nova-pro-v1:0" >> ../../webui/.env)
+ echo "VITE_AWS_REGION=$(terraform output -raw aws_region)" > ../../../webui/.env && \
+ echo "VITE_KNOWLEDGE_BASE_ID=$(terraform output -raw knowledge_base_id)" >> ../../../webui/.env && \
+ echo "VITE_DATA_SOURCE_ID=$(terraform output -raw data_source_id)" >> ../../../webui/.env && \
+ echo "VITE_DATA_SOURCE_BUCKET_NAME=$(terraform output -raw data_source_bucket_name)" >> ../../../webui/.env && \
+ echo "VITE_API_GATEWAY_ENDPOINT=$(terraform output -raw api_gateway_endpoint)" >> ../../../webui/.env && \
+ echo "VITE_GENERATION_MODEL_ID=us.amazon.nova-2-lite-v1:0" >> ../../../webui/.env)
 
 # Add your AWS credentials
 echo "VITE_AWS_ACCESS_KEY_ID=your_access_key" >> .env
@@ -310,7 +311,7 @@ VITE_KNOWLEDGE_BASE_ID=<from terraform output>
 VITE_DATA_SOURCE_ID=<from terraform output>
 VITE_DATA_SOURCE_BUCKET_NAME=<from terraform output>
 VITE_API_GATEWAY_ENDPOINT=<from terraform output>
-VITE_GENERATION_MODEL_ID=us.amazon.nova-pro-v1:0
+VITE_GENERATION_MODEL_ID=us.amazon.nova-lite-v1:0
 VITE_AWS_ACCESS_KEY_ID=<your credentials>
 VITE_AWS_SECRET_ACCESS_KEY=<your credentials>
 ```
@@ -322,7 +323,7 @@ Key variables in `terraform/environments/dev/terraform.tfvars`:
 ```hcl
 environment = "dev"
 aws_region  = "us-east-1"
-nova_model_id = "amazon.titan-embed-text-v2:0"
+nova_model_id = "amazon.nova-embed-text-image-v2:0"
 ```
 
 ### Supported File Types
@@ -346,7 +347,7 @@ This solution uses serverless and managed services:
 
 To reduce costs:
 - Adjust OpenSearch capacity units in `terraform.tfvars`
-- Use Nova Lite instead of Nova Pro for generation
+- Use Nova Micro instead of Nova Lite for generation (faster, cheaper)
 - Delete the stack when not in use
 
 ## Cleanup
@@ -378,7 +379,7 @@ terraform destroy
 
 ### Generated Response Empty
 
-1. Verify Nova Pro model is available in your region
+1. Verify Nova Lite model is available in your region
 2. Check IAM permissions include `bedrock:InvokeModel`
 3. Ensure documents contain relevant content
 4. Try a more specific query
@@ -420,8 +421,14 @@ allowed_file_types = [".pdf", ".docx", ".txt", ".md", ".csv", ".json"]
 Change the generation model in `.env`:
 
 ```env
-# Faster, lower cost
+# Fast and cost-effective (default)
 VITE_GENERATION_MODEL_ID=us.amazon.nova-lite-v1:0
+
+# Fastest, lowest cost
+VITE_GENERATION_MODEL_ID=us.amazon.nova-micro-v1:0
+
+# Balanced performance
+VITE_GENERATION_MODEL_ID=us.amazon.nova-pro-v1:0
 
 # Claude models
 VITE_GENERATION_MODEL_ID=anthropic.claude-3-sonnet-20240229-v1:0

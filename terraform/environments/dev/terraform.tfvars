@@ -5,7 +5,7 @@ aws_region  = "us-east-1"
 
 # Nova embedding model - Note: Nova multimodal is not yet available in all regions
 # Using Titan text embedding as fallback
-nova_model_id = "amazon.nova-embed-multimodal-v1"
+nova_model_id = "amazon.nova-2-multimodal-embeddings-v1:0"
 
 # Allowed file types
 allowed_file_types = [".txt", ".md", ".pdf", ".png", ".jpg", ".docx", ".xlsx"]

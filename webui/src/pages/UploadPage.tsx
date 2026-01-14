@@ -455,6 +455,8 @@ export const UploadPage: React.FC = () => {
         <ul style={{ marginBottom: 0, paddingLeft: '1.5rem', color: '#004085' }}>
           <li>Files are uploaded directly to S3 with the pattern: {`{store_id}/{document_id}/{filename}`}</li>
           <li>After uploading, click "Start Ingestion" to process documents into the Knowledge Base</li>
+          <li><strong>Note:</strong> Ingestion syncs all new/modified files in the bucket (all stores)</li>
+          <li><strong>Search is filtered by store:</strong> You will only see results for your current store</li>
           <li>Ingestion typically takes a few minutes depending on file count and size</li>
           <li>Supported formats: Text (.txt, .md), PDF, Images (.png, .jpg), Office (.docx, .xlsx)</li>
           <li>All files will be associated with the current store: {selectedStoreId}</li>

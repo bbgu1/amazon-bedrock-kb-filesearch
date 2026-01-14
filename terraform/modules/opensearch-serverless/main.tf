@@ -149,7 +149,7 @@ resource "opensearch_index" "bedrock_vector_index_files" {
     properties = {
       "bedrock-knowledge-base-default-vector" = {
         type      = "knn_vector"
-        dimension = 1024
+        dimension = 3072
         method = {
           name   = "hnsw"
           engine = "faiss"
